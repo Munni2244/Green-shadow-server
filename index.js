@@ -103,7 +103,7 @@ async function run() {
     /// get reviews
     app.get('/review', async (req, res) => {
       const cursor = await reviewsCollection.find({}).toArray();
-      console.log('review data');
+      // console.log('review data');
       res.send(cursor)
 
     })
@@ -126,26 +126,33 @@ async function run() {
     app.post('/addUserInfo', async (req, res) => {
       const docs = req.body;
       const result = await userCollection.insertOne(docs);
-      console.log(result);
+      // console.log(result);
       res.send(result)
 
     })
 
     app.put('/makeAdmin', async (req, res) => {
-      const email = req.body;
-      const filter = { email: email };
-      const result = await userCollection.find(filter).toArray();
-      if (result) {
-        const doc = await userCollection.updateOne(filter, {
-          $set: {
-            role: "admin"
-          },
+      const user = req.body;
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: 'admin' } };
+      const doc = await userCollection.updateOne(filter, updateDoc)
 
-        });
-        console.log(doc);
-        res.send(doc)
+      res.send(doc)
+
+
+    })
+
+    ///check admin 
+    app.get('/users/:email', async(req,res)=>{
+      const email= req.params.email;
+      const  query= {email: email};
+      const user= await userCollection.findOne(query);
+      let isAdmin= false;
+      if(user?.role){
+        isAdmin=true;
       }
-
+    // console.log(isAdimn);
+      res.send({admin: isAdmin})
     })
 
   } finally {
